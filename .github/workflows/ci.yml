@@ -42,10 +42,10 @@ jobs:
         run: dotnet build GeocodeCache.slnx -c Release --no-restore
 
       - name: Test (unit)
-        # Integration tests are excluded by default (they need AWS-compatible endpoints).
+        # Run the unit-test project directly. The integration suite (DynamoDB Local) is opt-in and
+        # is intentionally not executed here; the solution build above still compiles it.
         run: >
-          dotnet test GeocodeCache.slnx -c Release --no-build
-          --filter "Category!=Integration"
+          dotnet test tests/GeocodeCache.UnitTests/GeocodeCache.UnitTests.csproj -c Release --no-build
           --logger "trx;LogFileName=test-results.trx"
           --collect:"XPlat Code Coverage"
 

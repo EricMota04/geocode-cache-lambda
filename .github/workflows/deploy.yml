@@ -50,7 +50,7 @@ jobs:
       - name: Build & test
         run: |
           dotnet build GeocodeCache.slnx -c Release
-          dotnet test GeocodeCache.slnx -c Release --no-build --filter "Category!=Integration"
+          dotnet test tests/GeocodeCache.UnitTests/GeocodeCache.UnitTests.csproj -c Release --no-build
 
       - name: Package Lambda
         run: ./scripts/package-lambda.sh
