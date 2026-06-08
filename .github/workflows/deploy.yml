@@ -27,6 +27,8 @@ jobs:
   deploy:
     name: Package & Terraform
     runs-on: ubuntu-latest
+    # Skip (rather than fail) until the AWS deploy role + state bucket are configured as repo variables.
+    if: ${{ vars.AWS_DEPLOY_ROLE_ARN != '' && vars.TF_STATE_BUCKET != '' }}
     environment: dev
     env:
       CI: "true"
