@@ -47,9 +47,14 @@
             "exec": [
               "pm.test('200 OK', () => pm.response.to.have.status(200));",
               "const d = pm.response.json();",
+              "if (d.ChallengeName) { console.error('Cognito challenge:', d.ChallengeName, '- set a PERMANENT password for the user'); }",
               "const token = d.AuthenticationResult && d.AuthenticationResult.IdToken;",
-              "pm.test('IdToken returned', () => pm.expect(token).to.be.a('string').and.not.empty);",
-              "if (token) { pm.collectionVariables.set('idToken', token); }"
+              "pm.test('IdToken returned', () => pm.expect(token, 'IdToken missing').to.be.a('string').and.not.empty);",
+              "if (token) {",
+              "  pm.collectionVariables.set('idToken', token);",
+              "  if (pm.environment.name) { pm.environment.set('idToken', token); }",
+              "  console.log('Saved idToken (len ' + token.length + ')');",
+              "}"
             ]
           }
         }
