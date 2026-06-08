@@ -1,6 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Infrastructure layer: adapters for AWS + Google. Depends on Domain (and Application for DI wiring). -->
+  <!-- Infrastructure layer: adapters for AWS + Google. Depends on Domain (and Application for options/DI wiring). -->
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
+    <PackageReference Include="AWSSDK.SecretsManager" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GeocodeCache.Domain\GeocodeCache.Domain.csproj" />

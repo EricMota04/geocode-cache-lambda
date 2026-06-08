@@ -71,7 +71,7 @@ cd infra/terraform/envs/dev && terraform init && terraform apply
 
 - [x] **Stage 0** — Monorepo scaffold, solution, central build/package config, CI skeleton.
 - [x] **Stage 1** — Domain + Application caching core + unit tests.
-- [ ] **Stage 2** — Infrastructure adapters (DynamoDB, Google, Secrets Manager).
+- [x] **Stage 2** — Infrastructure adapters (DynamoDB, Google, Secrets Manager).
 - [ ] **Stage 3** — Lambda host (handler, DI, logging, metrics, tracing).
 - [ ] **Stage 4** — Terraform core (DynamoDB, Lambda, REST API, IAM, secrets).
 - [ ] **Stage 5** — Auth + edge (Cognito, WAF, throttling, provisioned concurrency).
