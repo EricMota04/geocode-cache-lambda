@@ -1,0 +1,14 @@
+{
+  "Information": [
+    "Defaults for `dotnet lambda` packaging/deployment. Infrastructure is managed by Terraform;",
+    "these values keep the CLI build output consistent with the Terraform Lambda definition."
+  ],
+  "profile": "",
+  "region": "",
+  "configuration": "Release",
+  "function-runtime": "dotnet8",
+  "function-architecture": "x86_64",
+  "function-memory-size": 512,
+  "function-timeout": 30,
+  "function-handler": "GeocodeCache.Lambda::GeocodeCache.Lambda.GeocodeFunction::FunctionHandlerAsync"
+}

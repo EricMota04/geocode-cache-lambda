@@ -2,17 +2,38 @@
 
   <!--
     Lambda host (deployable). Composition root that wires Application + Infrastructure.
-    AWS Lambda package settings are added in Stage 3 along with the function code.
+    Targets net8.0 -> deployed on the AWS Lambda managed `dotnet8` runtime.
   -->
   <PropertyGroup>
     <AWSProjectType>Lambda</AWSProjectType>
-    <!-- Generate a ready-to-run, self-contained bundle layout suited to Lambda. -->
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <!-- Required so `dotnet lambda package` trims/optimizes correctly for the managed runtime. -->
+    <PublishReadyToRun>false</PublishReadyToRun>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Amazon.Lambda.Core" />
+    <PackageReference Include="Amazon.Lambda.APIGatewayEvents" />
+    <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" />
+    <PackageReference Include="AWSXRayRecorder.Handlers.AwsSdk" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GeocodeCache.Application\GeocodeCache.Application.csproj" />
     <ProjectReference Include="..\GeocodeCache.Infrastructure\GeocodeCache.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GeocodeCache.UnitTests" />
   </ItemGroup>
 
 </Project>
