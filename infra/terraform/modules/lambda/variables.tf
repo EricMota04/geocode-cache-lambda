@@ -43,6 +43,12 @@ variable "log_retention_days" {
   type        = number
 }
 
+variable "provisioned_concurrency" {
+  description = "Provisioned concurrent executions (0 = disabled). Note: > 0 incurs continuous cost."
+  type        = number
+  default     = 0
+}
+
 variable "tags" {
   description = "Tags to apply."
   type        = map(string)

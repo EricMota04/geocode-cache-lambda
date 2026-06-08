@@ -9,8 +9,13 @@ output "function_arn" {
 }
 
 output "invoke_arn" {
-  description = "The Lambda invoke ARN (for API Gateway integration)."
-  value       = aws_lambda_function.this.invoke_arn
+  description = "The Lambda invoke ARN (alias ARN when provisioned concurrency is enabled)."
+  value       = local.pc_enabled ? aws_lambda_alias.live[0].invoke_arn : aws_lambda_function.this.invoke_arn
+}
+
+output "qualifier" {
+  description = "Alias qualifier when provisioned concurrency is enabled, else null."
+  value       = local.pc_enabled ? aws_lambda_alias.live[0].name : null
 }
 
 output "log_group_name" {

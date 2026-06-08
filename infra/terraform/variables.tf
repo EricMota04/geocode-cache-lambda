@@ -81,3 +81,41 @@ variable "log_retention_days" {
   type        = number
   default     = 14
 }
+
+# ---- Auth + edge security ----
+
+variable "enable_cognito_auth" {
+  description = "Require a Cognito JWT on the endpoint (recommended). Set false to expose it openly."
+  type        = bool
+  default     = true
+}
+
+variable "enable_waf" {
+  description = "Attach an AWS WAF Web ACL to the API stage."
+  type        = bool
+  default     = true
+}
+
+variable "waf_rate_limit" {
+  description = "Per-IP request limit over a 5-minute window before WAF blocks."
+  type        = number
+  default     = 2000
+}
+
+variable "api_throttling_rate_limit" {
+  description = "Steady-state requests/second throttle for the API stage."
+  type        = number
+  default     = 50
+}
+
+variable "api_throttling_burst_limit" {
+  description = "Burst request throttle for the API stage."
+  type        = number
+  default     = 100
+}
+
+variable "provisioned_concurrency" {
+  description = "Lambda provisioned concurrent executions (0 = disabled). Note: > 0 incurs continuous cost."
+  type        = number
+  default     = 0
+}

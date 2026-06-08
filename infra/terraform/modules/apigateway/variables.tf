@@ -19,14 +19,14 @@ variable "lambda_function_name" {
   type        = string
 }
 
-variable "authorization" {
-  description = "Method authorization type (NONE or COGNITO_USER_POOLS)."
-  type        = string
-  default     = "NONE"
+variable "cognito_user_pool_arns" {
+  description = "Cognito user pool ARNs. When non-empty, the GET method requires a Cognito JWT."
+  type        = list(string)
+  default     = []
 }
 
-variable "authorizer_id" {
-  description = "API Gateway authorizer id (set when authorization is COGNITO_USER_POOLS)."
+variable "lambda_qualifier" {
+  description = "Optional Lambda alias/version qualifier (set when provisioned concurrency is enabled)."
   type        = string
   default     = null
 }

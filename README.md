@@ -71,9 +71,12 @@ aws secretsmanager put-secret-value \
   --secret-id "$(terraform -chdir=infra/terraform output -raw google_api_key_secret_name)" \
   --secret-string "<YOUR_GOOGLE_API_KEY>"
 
-# 3. Call it
-curl "$(terraform -chdir=infra/terraform output -raw geocode_url)?address=70 Vanderbilt Ave, New York, NY 10017"
+# 3. Call it (the endpoint requires a Cognito JWT by default — see docs/demo-script.md to mint one)
+curl -H "Authorization: Bearer <JWT>" \
+  "$(terraform -chdir=infra/terraform output -raw geocode_url)?address=70 Vanderbilt Ave, New York, NY 10017"
 ```
+
+> To try it without auth, set `enable_cognito_auth = false` (and `enable_waf = false`) in `terraform.tfvars`.
 
 Manual equivalent: `./scripts/package-lambda.sh && cd infra/terraform && terraform init && terraform apply`.
 The Google key is never stored in Terraform state — Terraform creates the empty secret; you set its value.
@@ -85,6 +88,6 @@ The Google key is never stored in Terraform state — Terraform creates the empt
 - [x] **Stage 2** — Infrastructure adapters (DynamoDB, Google, Secrets Manager).
 - [x] **Stage 3** — Lambda host (handler, DI, logging, metrics, tracing).
 - [x] **Stage 4** — Terraform core (DynamoDB, Lambda, REST API, IAM, KMS, secret, logs).
-- [ ] **Stage 5** — Auth + edge (Cognito, WAF, throttling, provisioned concurrency).
+- [x] **Stage 5** — Auth + edge (Cognito, WAF, throttling, provisioned concurrency).
 - [ ] **Stage 6** — Full CI/CD (package + terraform plan/apply via OIDC).
 - [ ] **Stage 7** — Hardening + docs (alarms/dashboard, stampede guard, architecture + demo).

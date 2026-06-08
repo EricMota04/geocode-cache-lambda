@@ -32,3 +32,18 @@ output "kms_key_arn" {
   description = "ARN of the application KMS key."
   value       = aws_kms_key.main.arn
 }
+
+output "cognito_user_pool_id" {
+  description = "Cognito user pool id (for creating demo users and obtaining JWTs)."
+  value       = module.cognito.user_pool_id
+}
+
+output "cognito_client_id" {
+  description = "Cognito app client id (used with cognito-idp initiate-auth)."
+  value       = module.cognito.client_id
+}
+
+output "waf_web_acl_arn" {
+  description = "ARN of the WAF Web ACL (null when WAF is disabled)."
+  value       = var.enable_waf ? module.waf[0].web_acl_arn : null
+}

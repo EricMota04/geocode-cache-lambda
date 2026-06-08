@@ -93,16 +93,23 @@ module "iam" {
   tags        = local.common_tags
 }
 
+module "cognito" {
+  source      = "./modules/cognito"
+  name_prefix = local.name_prefix
+  tags        = local.common_tags
+}
+
 module "lambda" {
-  source             = "./modules/lambda"
-  function_name      = "${local.name_prefix}-geocode"
-  role_arn           = module.iam.role_arn
-  package_path       = var.lambda_package_path
-  handler            = var.lambda_handler
-  memory_mb          = var.lambda_memory_mb
-  timeout_seconds    = var.lambda_timeout_seconds
-  kms_key_arn        = aws_kms_key.main.arn
-  log_retention_days = var.log_retention_days
+  source                  = "./modules/lambda"
+  function_name           = "${local.name_prefix}-geocode"
+  role_arn                = module.iam.role_arn
+  package_path            = var.lambda_package_path
+  handler                 = var.lambda_handler
+  memory_mb               = var.lambda_memory_mb
+  timeout_seconds         = var.lambda_timeout_seconds
+  kms_key_arn             = aws_kms_key.main.arn
+  log_retention_days      = var.log_retention_days
+  provisioned_concurrency = var.provisioned_concurrency
 
   environment = {
     DynamoDb__TableName      = module.dynamodb.table_name
@@ -117,9 +124,22 @@ module "lambda" {
 }
 
 module "apigateway" {
-  source               = "./modules/apigateway"
-  name_prefix          = local.name_prefix
-  lambda_invoke_arn    = module.lambda.invoke_arn
-  lambda_function_name = module.lambda.function_name
-  tags                 = local.common_tags
+  source                 = "./modules/apigateway"
+  name_prefix            = local.name_prefix
+  lambda_invoke_arn      = module.lambda.invoke_arn
+  lambda_function_name   = module.lambda.function_name
+  lambda_qualifier       = module.lambda.qualifier
+  cognito_user_pool_arns = var.enable_cognito_auth ? [module.cognito.user_pool_arn] : []
+  throttling_rate_limit  = var.api_throttling_rate_limit
+  throttling_burst_limit = var.api_throttling_burst_limit
+  tags                   = local.common_tags
+}
+
+module "waf" {
+  count       = var.enable_waf ? 1 : 0
+  source      = "./modules/waf"
+  name_prefix = local.name_prefix
+  stage_arn   = module.apigateway.stage_arn
+  rate_limit  = var.waf_rate_limit
+  tags        = local.common_tags
 }
