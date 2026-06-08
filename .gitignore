@@ -1,0 +1,36 @@
+# ---- .NET ----
+bin/
+obj/
+*.user
+*.suo
+.vs/
+artifacts/
+TestResults/
+coverage*.xml
+coverage*.json
+*.trx
+
+# Lambda packaging output
+*.zip
+aws-lambda-tools-defaults.local.json
+
+# ---- Terraform ----
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+override.tf
+override.tf.json
+
+# ---- Secrets / local env ----
+.env
+*.local
+secrets.json
+
+# ---- IDE / OS ----
+.idea/
+.DS_Store
+*.swp

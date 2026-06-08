@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GeocodeCache.Application/GeocodeCache.Application.csproj" />
+    <Project Path="src/GeocodeCache.Domain/GeocodeCache.Domain.csproj" />
+    <Project Path="src/GeocodeCache.Infrastructure/GeocodeCache.Infrastructure.csproj" />
+    <Project Path="src/GeocodeCache.Lambda/GeocodeCache.Lambda.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GeocodeCache.IntegrationTests/GeocodeCache.IntegrationTests.csproj" />
+    <Project Path="tests/GeocodeCache.UnitTests/GeocodeCache.UnitTests.csproj" />
+  </Folder>
+</Solution>

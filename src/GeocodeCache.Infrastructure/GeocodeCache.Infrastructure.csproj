@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Infrastructure layer: adapters for AWS + Google. Depends on Domain (and Application for DI wiring). -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\GeocodeCache.Domain\GeocodeCache.Domain.csproj" />
+    <ProjectReference Include="..\GeocodeCache.Application\GeocodeCache.Application.csproj" />
+  </ItemGroup>
+
+</Project>

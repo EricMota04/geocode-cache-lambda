@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Lambda host (deployable). Composition root that wires Application + Infrastructure.
+    AWS Lambda package settings are added in Stage 3 along with the function code.
+  -->
+  <PropertyGroup>
+    <AWSProjectType>Lambda</AWSProjectType>
+    <!-- Generate a ready-to-run, self-contained bundle layout suited to Lambda. -->
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GeocodeCache.Application\GeocodeCache.Application.csproj" />
+    <ProjectReference Include="..\GeocodeCache.Infrastructure\GeocodeCache.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

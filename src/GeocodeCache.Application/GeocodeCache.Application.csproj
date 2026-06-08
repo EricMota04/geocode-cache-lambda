@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Application layer: orchestration/use-cases. Depends only on Domain. -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\GeocodeCache.Domain\GeocodeCache.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

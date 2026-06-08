@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Domain layer: pure C#, no AWS or third-party runtime dependencies.
+    Holds models, abstractions (ports), and domain logic only.
+    Framework/quality settings come from the root Directory.Build.props.
+  -->
+
+</Project>
