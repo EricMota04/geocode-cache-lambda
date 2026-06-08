@@ -58,14 +58,25 @@ dotnet test  GeocodeCache.slnx -c Release --filter "Category!=Integration"
 
 ## Deploy
 
-Documented as the Terraform and CI/CD stages land. High level:
+The entire stack (DynamoDB, Lambda + code, REST API, IAM, KMS, secret container, log group) is
+provisioned by one Terraform root in `infra/terraform`. Requires the AWS CLI configured with
+credentials, plus the .NET 10 SDK and Terraform.
 
 ```bash
-# 1. store the Google API key (one time)
-aws secretsmanager create-secret --name geocode-cache/google-api-key --secret-string "<KEY>"
-# 2. stand up everything
-cd infra/terraform/envs/dev && terraform init && terraform apply
+# 1. Build the Lambda zip + stand up the stack (make package runs automatically via tf-apply)
+make tf-apply            # = scripts/package-lambda.sh then terraform apply
+
+# 2. Put the Google API key into the secret Terraform created (one time)
+aws secretsmanager put-secret-value \
+  --secret-id "$(terraform -chdir=infra/terraform output -raw google_api_key_secret_name)" \
+  --secret-string "<YOUR_GOOGLE_API_KEY>"
+
+# 3. Call it
+curl "$(terraform -chdir=infra/terraform output -raw geocode_url)?address=70 Vanderbilt Ave, New York, NY 10017"
 ```
+
+Manual equivalent: `./scripts/package-lambda.sh && cd infra/terraform && terraform init && terraform apply`.
+The Google key is never stored in Terraform state — Terraform creates the empty secret; you set its value.
 
 ## Delivery stages
 
@@ -73,7 +84,7 @@ cd infra/terraform/envs/dev && terraform init && terraform apply
 - [x] **Stage 1** — Domain + Application caching core + unit tests.
 - [x] **Stage 2** — Infrastructure adapters (DynamoDB, Google, Secrets Manager).
 - [x] **Stage 3** — Lambda host (handler, DI, logging, metrics, tracing).
-- [ ] **Stage 4** — Terraform core (DynamoDB, Lambda, REST API, IAM, secrets).
+- [x] **Stage 4** — Terraform core (DynamoDB, Lambda, REST API, IAM, KMS, secret, logs).
 - [ ] **Stage 5** — Auth + edge (Cognito, WAF, throttling, provisioned concurrency).
 - [ ] **Stage 6** — Full CI/CD (package + terraform plan/apply via OIDC).
 - [ ] **Stage 7** — Hardening + docs (alarms/dashboard, stampede guard, architecture + demo).

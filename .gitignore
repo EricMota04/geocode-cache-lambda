@@ -16,7 +16,7 @@ aws-lambda-tools-defaults.local.json
 
 # ---- Terraform ----
 .terraform/
-.terraform.lock.hcl
+# NOTE: .terraform.lock.hcl IS committed (pins provider versions for reproducible builds).
 *.tfstate
 *.tfstate.*
 *.tfvars
