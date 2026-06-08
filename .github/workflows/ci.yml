@@ -29,8 +29,11 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          # Build with the .NET 10 SDK; projects target net8.0 (the Lambda managed runtime).
-          dotnet-version: "10.0.x"
+          # Build with the .NET 10 SDK; also install the .NET 8 runtime so net8.0 tests
+          # execute on the same runtime as production (the Lambda dotnet8 managed runtime).
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Restore
         run: dotnet restore GeocodeCache.slnx

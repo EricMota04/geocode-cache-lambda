@@ -1,0 +1,22 @@
+<Project>
+
+  <!-- Inherit the repo-wide settings, then apply test-project-friendly overrides. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!--
+      Tests target net8.0 (to match production) but roll forward to a newer installed runtime
+      so they run wherever only a later .NET runtime is present (e.g. .NET 10 dev box / CI).
+    -->
+    <RollForward>Major</RollForward>
+    <!--
+      Relax rules that are noise in test code:
+      CA1707 - underscores in names (the readable Given_When_Then test convention)
+      CA2007 - ConfigureAwait(false) (irrelevant; tests have no synchronization context)
+    -->
+    <NoWarn>$(NoWarn);CA1707;CA2007</NoWarn>
+  </PropertyGroup>
+
+</Project>

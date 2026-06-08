@@ -1,10 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <IsPackable>false</IsPackable>
-    <!-- Test docs add no value and would trip GenerateDocumentationFile warnings. -->
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-  </PropertyGroup>
+  <!-- Common test settings (IsPackable, doc-gen off, analyzer NoWarn) live in tests/Directory.Build.props. -->
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />

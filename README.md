@@ -70,7 +70,7 @@ cd infra/terraform/envs/dev && terraform init && terraform apply
 ## Delivery stages
 
 - [x] **Stage 0** — Monorepo scaffold, solution, central build/package config, CI skeleton.
-- [ ] **Stage 1** — Domain + Application caching core + unit tests.
+- [x] **Stage 1** — Domain + Application caching core + unit tests.
 - [ ] **Stage 2** — Infrastructure adapters (DynamoDB, Google, Secrets Manager).
 - [ ] **Stage 3** — Lambda host (handler, DI, logging, metrics, tracing).
 - [ ] **Stage 4** — Terraform core (DynamoDB, Lambda, REST API, IAM, secrets).

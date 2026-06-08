@@ -4,10 +4,7 @@
     Integration tests (optional, e.g. DynamoDB Local). Gated behind a trait so CI can
     skip them by default; they only run when AWS-compatible endpoints are available.
   -->
-  <PropertyGroup>
-    <IsPackable>false</IsPackable>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
-  </PropertyGroup>
+  <!-- Common test settings live in tests/Directory.Build.props. -->
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
