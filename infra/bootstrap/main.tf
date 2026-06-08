@@ -79,6 +79,8 @@ data "aws_iam_policy_document" "deploy" {
       "wafv2:*",
       "cognito-idp:*",
       "logs:*",
+      "cloudwatch:*",
+      "iam:CreateServiceLinkedRole",
       "iam:GetRole",
       "iam:CreateRole",
       "iam:DeleteRole",
