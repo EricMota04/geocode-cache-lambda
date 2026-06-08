@@ -1,0 +1,266 @@
+{
+  "info": {
+    "_postman_id": "a1f0c2e4-7b3d-4c9a-9e21-geocodecache01",
+    "name": "Geocode Cache API",
+    "description": "Test matrix for the Geocode Cache Lambda (caching, auth, validation, edge). Run 'Auth - Get JWT' first; it stores {{idToken}} used by the other requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{idToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://REPLACE.execute-api.us-east-1.amazonaws.com/v1" },
+    { "key": "region", "value": "us-east-1" },
+    { "key": "cognitoClientId", "value": "REPLACE_CLIENT_ID" },
+    { "key": "username", "value": "demo@example.com" },
+    { "key": "password", "value": "Passw0rd!23" },
+    { "key": "idToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth - Get JWT (Cognito)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-amz-json-1.1" },
+          { "key": "X-Amz-Target", "value": "AWSCognitoIdentityProviderService.InitiateAuth" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"AuthFlow\": \"USER_PASSWORD_AUTH\",\n  \"ClientId\": \"{{cognitoClientId}}\",\n  \"AuthParameters\": {\n    \"USERNAME\": \"{{username}}\",\n    \"PASSWORD\": \"{{password}}\"\n  }\n}"
+        },
+        "url": {
+          "raw": "https://cognito-idp.{{region}}.amazonaws.com/",
+          "protocol": "https",
+          "host": ["cognito-idp", "{{region}}", "amazonaws", "com"],
+          "path": [""]
+        },
+        "description": "Case 1: obtain a Cognito JWT (USER_PASSWORD_AUTH). Stores the IdToken in {{idToken}}."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const d = pm.response.json();",
+              "const token = d.AuthenticationResult && d.AuthenticationResult.IdToken;",
+              "pm.test('IdToken returned', () => pm.expect(token).to.be.a('string').and.not.empty);",
+              "if (token) { pm.collectionVariables.set('idToken', token); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geocode - success (MISS then HIT)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Geocode?address=70 Vanderbilt Ave, New York, NY 10017, United States",
+          "host": ["{{baseUrl}}"],
+          "path": ["Geocode"],
+          "query": [{ "key": "address", "value": "70 Vanderbilt Ave, New York, NY 10017, United States" }]
+        },
+        "description": "Cases 2 & 3: first call -> X-Cache: MISS; run again -> X-Cache: HIT."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const xc = pm.response.headers.get('X-Cache');",
+              "console.log('X-Cache =', xc);",
+              "pm.test('X-Cache is HIT or MISS', () => pm.expect(['HIT','MISS']).to.include(xc));",
+              "pm.test('Google status OK', () => pm.expect(pm.response.json().status).to.eql('OK'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geocode - normalization (expect HIT)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Geocode?address=  70   vanderbilt AVE, new york, ny 10017, united states ",
+          "host": ["{{baseUrl}}"],
+          "path": ["Geocode"],
+          "query": [{ "key": "address", "value": "  70   vanderbilt AVE, new york, ny 10017, united states " }]
+        },
+        "description": "Case 4: different spacing/casing of an already-cached address normalizes to the same key -> HIT."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "console.log('X-Cache =', pm.response.headers.get('X-Cache'));",
+              "pm.test('Served from cache (HIT)', () => pm.expect(pm.response.headers.get('X-Cache')).to.eql('HIT'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geocode - ZERO_RESULTS (negative cache)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Geocode?address=zzzz no such place 99999 qqqq",
+          "host": ["{{baseUrl}}"],
+          "path": ["Geocode"],
+          "query": [{ "key": "address", "value": "zzzz no such place 99999 qqqq" }]
+        },
+        "description": "Case 5: valid-but-unfound address -> 200 with status ZERO_RESULTS, cached with the short negative TTL."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('status ZERO_RESULTS', () => pm.expect(pm.response.json().status).to.eql('ZERO_RESULTS'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geocode - missing address (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/Geocode", "host": ["{{baseUrl}}"], "path": ["Geocode"] },
+        "description": "Case 6: no address query param -> 400 missing_address."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+              "pm.test('error = missing_address', () => pm.expect(pm.response.json().error).to.eql('missing_address'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geocode - blank address (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Geocode?address=",
+          "host": ["{{baseUrl}}"],
+          "path": ["Geocode"],
+          "query": [{ "key": "address", "value": "" }]
+        },
+        "description": "Case 7: blank address -> 400 missing_address (rejected before any Google call)."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('400 Bad Request', () => pm.response.to.have.status(400));",
+              "pm.test('error = missing_address', () => pm.expect(pm.response.json().error).to.eql('missing_address'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geocode - no token (401)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/Geocode?address=70 Vanderbilt Ave, New York, NY 10017",
+          "host": ["{{baseUrl}}"],
+          "path": ["Geocode"],
+          "query": [{ "key": "address", "value": "70 Vanderbilt Ave, New York, NY 10017" }]
+        },
+        "description": "Case 8: no Authorization header -> 401 from the Cognito authorizer."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geocode - invalid token (401)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer not.a.valid.token" }],
+        "url": {
+          "raw": "{{baseUrl}}/Geocode?address=70 Vanderbilt Ave, New York, NY 10017",
+          "host": ["{{baseUrl}}"],
+          "path": ["Geocode"],
+          "query": [{ "key": "address", "value": "70 Vanderbilt Ave, New York, NY 10017" }]
+        },
+        "description": "Case 9: malformed/expired JWT -> 401."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Geocode - wrong method POST (403)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": { "mode": "raw", "raw": "" },
+        "url": {
+          "raw": "{{baseUrl}}/Geocode?address=70 Vanderbilt Ave, New York, NY 10017",
+          "host": ["{{baseUrl}}"],
+          "path": ["Geocode"],
+          "query": [{ "key": "address", "value": "70 Vanderbilt Ave, New York, NY 10017" }]
+        },
+        "description": "Case 10: only GET is defined -> API Gateway returns 403 'Missing Authentication Token'."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('403 Forbidden', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -11,8 +11,9 @@ GET /Geocode?address=70 Vanderbilt Ave, New York, NY 10017, United States
 → 200  { ...full Google Geocoding response... }   X-Cache: HIT    (within 30 days)
 ```
 
-> Deep dives: [docs/architecture.md](docs/architecture.md) (design + diagram + hardening roadmap)
-> and [docs/demo-script.md](docs/demo-script.md) (narrated walkthrough).
+> Deep dives: [docs/architecture.md](docs/architecture.md) (design + diagram + hardening roadmap),
+> [docs/demo-script.md](docs/demo-script.md) (narrated walkthrough), and
+> [docs/postman.md](docs/postman.md) (API test matrix + importable Postman collection).
 
 ## Why this design
 
