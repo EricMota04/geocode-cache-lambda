@@ -84,5 +84,28 @@ public sealed class DynamoDbGeocodeCacheTests
         captured.Item["GoogleStatus"].S.Should().Be(GoogleGeocodeStatus.ZeroResults);
         captured.Item["IsNegative"].BOOL.Should().Be(true);
         captured.Item["ExpiresAt"].N.Should().Be(ExpiresAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture));
+        captured.ConditionExpression.Should().Contain("attribute_not_exists");
+    }
+
+    [Fact]
+    public async Task PutAsync_swallows_conditional_check_failure_from_concurrent_writer()
+    {
+        _client.PutItemAsync(Arg.Any<PutItemRequest>(), Arg.Any<CancellationToken>())
+            .Returns<PutItemResponse>(_ => throw new ConditionalCheckFailedException("a fresher entry exists"));
+
+        var entry = new CachedGeocode
+        {
+            AddressKey = Key,
+            OriginalAddress = "x",
+            GoogleResponseJson = "{}",
+            GoogleStatus = GoogleGeocodeStatus.Ok,
+            IsNegative = false,
+            CachedAtUtc = CachedAt,
+            ExpiresAtUtc = ExpiresAt,
+        };
+
+        var act = async () => await CreateSut().PutAsync(entry);
+
+        await act.Should().NotThrowAsync();
     }
 }

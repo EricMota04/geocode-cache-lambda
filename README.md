@@ -11,7 +11,8 @@ GET /Geocode?address=70 Vanderbilt Ave, New York, NY 10017, United States
 → 200  { ...full Google Geocoding response... }   X-Cache: HIT    (within 30 days)
 ```
 
-> Status: built incrementally. See [Delivery stages](#delivery-stages) for what's landed so far.
+> Deep dives: [docs/architecture.md](docs/architecture.md) (design + diagram + hardening roadmap)
+> and [docs/demo-script.md](docs/demo-script.md) (narrated walkthrough).
 
 ## Why this design
 
@@ -103,4 +104,4 @@ cd infra/bootstrap && terraform init && terraform apply   # prints deploy_role_a
 - [x] **Stage 4** — Terraform core (DynamoDB, Lambda, REST API, IAM, KMS, secret, logs).
 - [x] **Stage 5** — Auth + edge (Cognito, WAF, throttling, provisioned concurrency).
 - [x] **Stage 6** — Full CI/CD (package + terraform plan/apply via OIDC).
-- [ ] **Stage 7** — Hardening + docs (alarms/dashboard, stampede guard, architecture + demo).
+- [x] **Stage 7** — Hardening + docs (alarms/dashboard, stampede guard, architecture + demo).

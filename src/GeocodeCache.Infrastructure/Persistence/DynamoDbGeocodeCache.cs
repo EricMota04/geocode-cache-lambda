@@ -53,6 +53,8 @@ public sealed class DynamoDbGeocodeCache : IGeocodeCache
     /// <inheritdoc />
     public async Task PutAsync(CachedGeocode entry, CancellationToken cancellationToken = default)
     {
+        var newExpiry = entry.ExpiresAtUtc.ToUnixTimeSeconds();
+
         var item = new Dictionary<string, AttributeValue>
         {
             [AttrAddressKey] = new AttributeValue { S = entry.AddressKey },
@@ -63,13 +65,40 @@ public sealed class DynamoDbGeocodeCache : IGeocodeCache
             [AttrCachedAt] = new AttributeValue { S = entry.CachedAtUtc.ToString("O", CultureInfo.InvariantCulture) },
             [AttrExpiresAt] = new AttributeValue
             {
-                N = entry.ExpiresAtUtc.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
+                N = newExpiry.ToString(CultureInfo.InvariantCulture),
             },
         };
 
-        await _client.PutItemAsync(
-            new PutItemRequest { TableName = _tableName, Item = item },
-            cancellationToken).ConfigureAwait(false);
+        try
+        {
+            // Cache-stampede guard: under concurrent misses for the same address, only write when
+            // there is no entry or ours is fresher. A slower writer's conditional check fails and is
+            // safely ignored, so it cannot overwrite a newer cached response.
+            await _client.PutItemAsync(
+                new PutItemRequest
+                {
+                    TableName           = _tableName,
+                    Item                = item,
+                    ConditionExpression = "attribute_not_exists(#k) OR #e < :newExpiry",
+                    ExpressionAttributeNames = new Dictionary<string, string>
+                    {
+                        ["#k"] = AttrAddressKey,
+                        ["#e"] = AttrExpiresAt,
+                    },
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":newExpiry"] = new AttributeValue
+                        {
+                            N = newExpiry.ToString(CultureInfo.InvariantCulture),
+                        },
+                    },
+                },
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (ConditionalCheckFailedException)
+        {
+            // A concurrent writer already stored a fresher entry — nothing to do.
+        }
     }
 
     private static CachedGeocode MapToDomain(Dictionary<string, AttributeValue> item) => new()

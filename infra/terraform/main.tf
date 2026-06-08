@@ -143,3 +143,13 @@ module "waf" {
   rate_limit  = var.waf_rate_limit
   tags        = local.common_tags
 }
+
+module "monitoring" {
+  source        = "./modules/monitoring"
+  name_prefix   = local.name_prefix
+  function_name = module.lambda.function_name
+  api_name      = module.apigateway.api_name
+  stage_name    = module.apigateway.stage_name
+  region        = var.aws_region
+  tags          = local.common_tags
+}

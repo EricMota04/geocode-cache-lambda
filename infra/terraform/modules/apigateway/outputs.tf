@@ -18,6 +18,16 @@ output "rest_api_id" {
   value       = aws_api_gateway_rest_api.this.id
 }
 
+output "api_name" {
+  description = "The REST API name."
+  value       = aws_api_gateway_rest_api.this.name
+}
+
+output "stage_name" {
+  description = "The deployed stage name."
+  value       = aws_api_gateway_stage.this.stage_name
+}
+
 output "execution_arn" {
   description = "The REST API execution ARN."
   value       = aws_api_gateway_rest_api.this.execution_arn
