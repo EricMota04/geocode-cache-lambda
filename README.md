@@ -81,6 +81,19 @@ curl -H "Authorization: Bearer <JWT>" \
 Manual equivalent: `./scripts/package-lambda.sh && cd infra/terraform && terraform init && terraform apply`.
 The Google key is never stored in Terraform state — Terraform creates the empty secret; you set its value.
 
+## CI/CD
+
+- **`ci.yml`** — builds and runs the unit tests on every PR and push.
+- **`deploy.yml`** — builds, tests, packages the Lambda, then `terraform plan` on PRs and
+  `terraform apply` on `main`. Authenticates to AWS via **GitHub OIDC** (no static keys).
+
+One-time setup: apply `infra/bootstrap` (creates the OIDC provider + deploy role), create an S3
+state bucket, then set repo variables `AWS_REGION`, `AWS_DEPLOY_ROLE_ARN`, `TF_STATE_BUCKET`.
+
+```bash
+cd infra/bootstrap && terraform init && terraform apply   # prints deploy_role_arn
+```
+
 ## Delivery stages
 
 - [x] **Stage 0** — Monorepo scaffold, solution, central build/package config, CI skeleton.
@@ -89,5 +102,5 @@ The Google key is never stored in Terraform state — Terraform creates the empt
 - [x] **Stage 3** — Lambda host (handler, DI, logging, metrics, tracing).
 - [x] **Stage 4** — Terraform core (DynamoDB, Lambda, REST API, IAM, KMS, secret, logs).
 - [x] **Stage 5** — Auth + edge (Cognito, WAF, throttling, provisioned concurrency).
-- [ ] **Stage 6** — Full CI/CD (package + terraform plan/apply via OIDC).
+- [x] **Stage 6** — Full CI/CD (package + terraform plan/apply via OIDC).
 - [ ] **Stage 7** — Hardening + docs (alarms/dashboard, stampede guard, architecture + demo).

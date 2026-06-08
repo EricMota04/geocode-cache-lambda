@@ -24,6 +24,7 @@ aws-lambda-tools-defaults.local.json
 crash.log
 override.tf
 override.tf.json
+ci_backend.tf
 
 # ---- Secrets / local env ----
 .env
